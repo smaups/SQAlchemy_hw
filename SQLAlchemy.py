@@ -64,19 +64,28 @@ def temperature():
     prcp_query = session.query(Measurement.date, Measurement.prcp).\
     filter(Measurement.date > prcp_last_record).\
     order_by(Measurement.date).all()
-    return jsonify(prcp_query)
+    prcp_print = list(np.ravel(prcp_query))
+    
+    return jsonify(prcp_print)
 
 @app.route("/api/v1.0/start/<start>")
 def start(start):
-    start_date = session.query(Measurement.date, Measurement.tobs).\
-    filter(Measurement.date >= start).all()
-    return jsonify(start_date)
+    start_date = session.query(func.min(Measurement.tobs),\
+        func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
+        filter(Measurement.date >= start).all()
+    start_print = list(np.ravel(start_date))
+    
+    return jsonify(start_print)
+
 
 @app.route("/api/v1.0/start-end/start/<start>/end/<end>")
 def start_end(start, end):
-    start_end = session.query(Measurement.date, Measurement.tobs).\
-    filter(Measurement.date >= start).filter(Measurement.date <= end).all()
-    return jsonify(start_end)
+    start_end = session.query(func.min(Measurement.tobs),\
+        func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
+        filter(Measurement.date >= start).filter(Measurement.date <= end).all()
+    
+    se = list(np.ravel(start_end))
+    return jsonify(se)
 
 if __name__ == '__main__':
     app.run(debug=True)
